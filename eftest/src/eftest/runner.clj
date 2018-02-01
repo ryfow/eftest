@@ -68,13 +68,14 @@
                                  #(binding [test/report report]
                                     (test/test-var v))))))
                           (wrap-test-with-timer test-warn-time))]
-    (once-fixtures
-      (fn []
-        (if (:multithread? opts true)
-          (let [test (bound-fn* test-var)]
-            (dorun (->> vars (filter synchronized?) (map test)))
-            (dorun (->> vars (remove synchronized?) (map (fn [v] #(test v))) run-in-parallel)))
-          (doseq [v vars] (test-var v)))))))
+    (when-not (and fail-fast? (failed-test?))
+      (once-fixtures
+       (fn []
+         (if (:multithread? opts true)
+           (let [test (bound-fn* test-var)]
+             (dorun (->> vars (filter synchronized?) (map test)))
+             (dorun (->> vars (remove synchronized?) (map (fn [v] #(test v))) run-in-parallel)))
+           (doseq [v vars] (test-var v))))))))
 
 (defn- test-ns [ns vars {:as opts :keys [capture-output?] :or {capture-output? true}}]
   (let [ns (the-ns ns)]
