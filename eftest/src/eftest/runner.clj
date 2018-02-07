@@ -73,8 +73,10 @@
        (fn []
          (if (:multithread? opts true)
            (let [test (bound-fn* test-var)]
-             (dorun (->> vars (filter synchronized?) (map test)))
-             (dorun (->> vars (remove synchronized?) (map (fn [v] #(test v))) run-in-parallel)))
+             (doseq [v (->> vars
+                            (filter synchronized?))]
+               (test-var v))
+             (doall (->> vars (remove synchronized?) (map (fn [v] #(test v))) run-in-parallel)))
            (doseq [v vars] (test-var v))))))))
 
 (defn- test-ns [ns vars {:as opts :keys [capture-output?] :or {capture-output? true}}]
