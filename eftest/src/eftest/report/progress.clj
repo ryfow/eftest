@@ -39,7 +39,7 @@
 (defmethod report :pass [m]
   (test/with-test-out
     (pretty/report m)
-    (print-progress (swap! report/*context* update-in [:state] set-state :pass))))
+    (swap! report/*context* update-in [:state] set-state :pass)))
 
 (defmethod report :fail [m]
   (test/with-test-out
